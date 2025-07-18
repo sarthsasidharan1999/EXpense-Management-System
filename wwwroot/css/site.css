@@ -1,0 +1,89 @@
+ Reset and layout 
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+}
+
+.layout-wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+ Sidebar 
+.sidebar {
+    width: 250px;
+    background-color: #202123;
+    color: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+.nav-link {
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+    .nav-link:hover {
+        background-color: #2e2e2e;
+    }
+
+    .nav-link i {
+        margin-right: 10px;
+    }
+
+.dropdown-menu {
+    display: none;
+    flex-direction: column;
+}
+
+#expenseDropdown.show .dropdown-menu {
+    display: flex;
+}
+
+ Main content 
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    padding: 20px;
+    height: 100vh;
+}
+
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+ Sidebar toggle collapsed 
+.sidebar.collapsed {
+    width: 60px;
+}
+
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .sidebar-brand span {
+        display: none;
+    }
+
+    .sidebar.collapsed .dropdown-menu {
+        display: none !important;
+    }
+
+.main-content.collapsed {
+    padding-left: 20px;
+}

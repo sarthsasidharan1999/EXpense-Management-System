@@ -1,0 +1,97 @@
+﻿body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.layout-wrapper {
+    height: 100vh;
+    display: flex;
+}
+
+.sidebar {
+    background-color: #202123; /* ChatGPT-like color */
+    height: 100vh;
+    width: 250px;
+    transition: width 0.3s ease;
+    overflow-y: auto;
+    color: #ececf1;
+}
+
+    .sidebar.collapsed {
+        width: 80px;
+    }
+
+    .sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+    }
+
+        .sidebar .nav-link i {
+            width: 30px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar .nav-link span {
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+        }
+
+    .sidebar.collapsed .nav-link span {
+        opacity: 0;
+        display: none;
+    }
+
+.sidebar-brand {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem;
+}
+
+.sidebar.collapsed .sidebar-brand span {
+    display: none;
+}
+
+.toggle-btn {
+    cursor: pointer;
+    text-align: right;
+    padding: 0.5rem 1rem;
+}
+
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.dropdown-menu {
+    display: none;
+    flex-direction: column;
+    animation: glideDown 0.3s ease-out forwards;
+}
+
+.dropdown.show .dropdown-menu {
+    display: flex;
+}
+
+.sidebar.collapsed .dropdown-menu {
+    display: none !important;
+}
+
+@keyframes glideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

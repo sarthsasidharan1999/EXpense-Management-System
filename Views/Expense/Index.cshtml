@@ -1,0 +1,160 @@
+﻿@model List<test_project.Models.Expense>
+@using System.Globalization
+@{
+    ViewData["Title"] = "My Expenses";
+    var labels = ViewBag.ChartLabels as List<string> ?? new List<string>();
+    var data = ViewBag.ChartData as List<decimal> ?? new List<decimal>();
+    var lineLabels = ViewBag.LineLabels as List<string> ?? new List<string>();
+    var lineData = ViewBag.LineData as List<decimal> ?? new List<decimal>();
+    var total = ViewBag.TotalAmount as decimal? ?? 0;
+    var fromDate = ViewContext.HttpContext.Request.Query["from"].ToString();
+    var toDate = ViewContext.HttpContext.Request.Query["to"].ToString();
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Filter and Export -->
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="from">From:</label>
+            <input type="date" name="from" class="form-control" value="@fromDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="to">To:</label>
+            <input type="date" name="to" class="form-control" value="@toDate" />
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="/Expense/Index" class="btn btn-secondary">Reset</a>
+        </div>
+        <div class="col-md-3 align-self-end text-end">
+            <button formaction="/Expense/ExportToPdf" formmethod="get" target="_blank" class="btn btn-danger">Download PDF</button>
+        </div>
+    </div>
+</form>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <canvas id="expenseChart" style="height: 400px;"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="lineChart" style="height: 400px;"></canvas>
+    </div>
+</div>
+
+<!-- Table -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Category?.Name</td>
+                <td>@item.Amount.ToString("C")</td>
+                <td>@item.Date.ToString("dd/MM/yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Total -->
+<div class="text-end fw-bold mb-4">
+    Total Expenses: @total.ToString("C")
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-center">
+    <button class="btn btn-outline-primary me-2" onclick="previousPage()">Previous</button>
+    <span id="pageInfo" class="align-self-center mt-2"></span>
+    <button class="btn btn-outline-primary ms-2" onclick="nextPage()">Next</button>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const pieLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(labels));
+        const pieData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data));
+        const lineLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lineLabels));
+        const lineData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lineData));
+
+        new Chart(document.getElementById('expenseChart'), {
+            type: 'pie',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    label: 'Expenses by Category',
+                    data: pieData,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: 'Expenses by Category' }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: lineLabels,
+                datasets: [{
+                    label: 'Expenses Over Time',
+                    data: lineData,
+                    borderColor: '#007bff',
+                    fill: false,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Daily Expense Trend' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Pagination
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        const table = document.querySelector("table tbody");
+        const allRows = Array.from(table.rows);
+
+        function renderTable() {
+            table.innerHTML = "";
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+            allRows.slice(start, end).forEach(row => table.appendChild(row));
+            document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${Math.ceil(allRows.length / rowsPerPage)}`;
+        }
+
+        function nextPage() {
+            if (currentPage * rowsPerPage < allRows.length) {
+                currentPage++;
+                renderTable();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        }
+
+        renderTable();
+    </script>
+}

@@ -1,0 +1,101 @@
+﻿@model test_project.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Welcome to Your Dashboard</h2>
+
+    @* <!-- User Details Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-1">User: <strong>@User.Identity?.Name</strong></h5>
+            <p class="card-text text-muted mb-0">Logged in on @DateTime.Now.ToString("dd MMM yyyy")</p>
+        </div>
+    </div> *@
+
+    <!-- Summary Cards Row -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Income</h6>
+                    <h5 class="text-success">₹@Model.TotalIncome.ToString("N2")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Expense</h6>
+                    <h5 class="text-danger">₹@Model.TotalExpense.ToString("N2")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Balance</h6>
+                    <h5 class="text-primary">₹@(Model.TotalIncome - Model.TotalExpense)</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Status</h6>
+                    @if (Model.TotalIncome - Model.TotalExpense >= 0)
+                    {
+                        <h5 class="text-success">Surplus</h5>
+                    }
+                    else
+                    {
+                        <h5 class="text-danger">Deficit</h5>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined Pie Chart -->
+    <div class="row">
+        <div class="col-md-6 offset-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white text-center">
+                    <strong>Income vs Expense Overview</strong>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <canvas id="summaryChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const summaryCtx = document.getElementById('summaryChart').getContext('2d');
+        const summaryChart = new Chart(summaryCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Income', 'Expense'],
+                datasets: [{
+                    label: 'Income vs Expense',
+                    data: [@Model.TotalIncome, @Model.TotalExpense],
+                    backgroundColor: ['#4CAF50', '#F44336']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}

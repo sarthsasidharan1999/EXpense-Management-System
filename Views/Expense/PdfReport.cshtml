@@ -1,0 +1,55 @@
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+
+// ...
+
+public IActionResult ExportToPdf()
+{
+    var userId = GetCurrentUserId();
+    if (userId == null)
+        return RedirectToAction("Login", "User");
+
+    var expenses = _context.Expenses
+        .Include(e => e.Category)
+        .Where(e => e.UserId == userId)
+        .OrderByDescending(e => e.Date)
+        .ToList();
+
+    using (var stream = new MemoryStream())
+    {
+        Document pdfDoc = new Document(PageSize.A4, 25, 25, 30, 30);
+        PdfWriter.GetInstance(pdfDoc, stream).CloseStream = false;
+
+        pdfDoc.Open();
+
+        // Title
+        var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+        pdfDoc.Add(new Paragraph("Expense Report", titleFont));
+        pdfDoc.Add(new Paragraph(" ")); // line break
+
+        // Table
+        PdfPTable table = new PdfPTable(3); // 3 columns: Date, Category, Amount
+        table.WidthPercentage = 100;
+        table.SetWidths(new float[] { 2f, 3f, 2f });
+
+        // Header row
+        var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 12);
+        table.AddCell(new PdfPCell(new Phrase("Date", headerFont)));
+        table.AddCell(new PdfPCell(new Phrase("Category", headerFont)));
+        table.AddCell(new PdfPCell(new Phrase("Amount", headerFont)));
+
+        // Data rows
+        foreach (var expense in expenses)
+        {
+            table.AddCell(expense.Date.ToString("dd/MM/yyyy"));
+            table.AddCell(expense.Category?.Name ?? "N/A");
+            table.AddCell(expense.Amount.ToString("C"));
+        }
+
+        pdfDoc.Add(table);
+        pdfDoc.Close();
+
+        stream.Position = 0;
+        return File(stream.ToArray(), "application/pdf", "ExpenseReport.pdf");
+    }
+}
